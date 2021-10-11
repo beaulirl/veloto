@@ -1,16 +1,11 @@
 import datetime
 from flask import Flask, make_response, jsonify, request
 from db.models import Task, Tokens, User, StravaEvent
-from config import POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, STRAVA_VERIFY_TOKEN
+from config import STRAVA_VERIFY_TOKEN
 
 app = Flask(__name__)
-from sqlalchemy import create_engine
-engine = create_engine(
-    f'postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@localhost/{POSTGRES_DB}'
-)
-from sqlalchemy.orm import sessionmaker
-Session = sessionmaker(bind=engine)
-session = Session()
+
+from db.config import session
 from services.strava_service import StravaAPI
 from services.notification_service import Notification
 
@@ -141,4 +136,4 @@ def post_strava_callback():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0')

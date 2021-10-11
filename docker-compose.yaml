@@ -1,16 +1,15 @@
 version: "3.8"
 
 services:
-#  api:
-#    restart: always
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#    depends_on:
-#      - db
-#    expose:
-#      - 8000
-#    command: /bin/bash -c "aft/app.py"
+  api:
+    restart: always
+    build: .
+    volumes:
+      - ./:/usr/src/app/
+    depends_on:
+      - db
+    ports:
+      - 5000:5000
 
 
   db:

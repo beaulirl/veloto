@@ -30,4 +30,3 @@ class StravaAPI:
         if response.status_code == 200:
             result = response.json()
             return result['recent_ride_totals']['distance']
-

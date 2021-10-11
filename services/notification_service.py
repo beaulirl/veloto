@@ -1,5 +1,5 @@
 from db.models import Notifications
-from app import session
+from db.config import session
 
 
 class Notification:

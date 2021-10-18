@@ -29,6 +29,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('access_token', sa.String(), nullable=True),
     sa.Column('refresh_token', sa.String(), nullable=True),
+    sa.Column('apns_token', sa.String(), nullable=True),
     sa.Column('timestamp', sa.TIMESTAMP(), nullable=False),
     sa.PrimaryKeyConstraint('id', name=op.f('pk__tokens'))
     )

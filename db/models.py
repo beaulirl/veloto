@@ -36,6 +36,7 @@ class Tokens(Base):
     access_token = Column("access_token", String)
     refresh_token = Column("refresh_token", String)
     access_expires_at = Column("timestamp", TIMESTAMP(timezone=False), nullable=False)
+    apns_token = Column("apns_token", String)
 
 
 user_task_table = Table(

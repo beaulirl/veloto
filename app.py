@@ -96,8 +96,14 @@ def create_user():
     access_token = request.form['access_token']
     refresh_token = request.form['refresh_token']
     strava_id = request.form['strava_id']
+    apns_token = request.form['apns_token']
     access_expires_at = datetime.datetime.fromtimestamp(int(request.form['access_expires_at']))
-    token = Tokens(access_token=access_token, refresh_token=refresh_token, access_expires_at=access_expires_at)
+    token = Tokens(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        access_expires_at=access_expires_at,
+        apns_token=apns_token
+    )
     session.add(token)
     session.commit()
     user = User(token=token.id, strava_id=strava_id)

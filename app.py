@@ -1,7 +1,7 @@
 import datetime
 from flask import Flask, make_response, jsonify, request
 from db.models import Task, Tokens, User, StravaEvent
-from config import STRAVA_VERIFY_TOKEN
+from config import STRAVA_VERIFY_TOKEN, TOKEN_ID
 
 app = Flask(__name__)
 
@@ -12,9 +12,27 @@ from services.notification_service import Notification
 strava_api = StravaAPI()
 notification = Notification()
 
+
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
+
+
+@property
+def token():
+    general_token = session.query(Tokens).filter_by(id=TOKEN_ID).first()
+    if general_token.timestamp < datetime.datetime.now().timestamp():
+        token_info = strava_api.update_expired_token(general_token.refresh_token)
+
+        if not token_info:
+            return
+
+        general_token.access_token = token_info.get('access_token')
+        general_token.refresh_token = token_info.get('refresh_token')
+        general_token.timestamp = token_info.get('expires_at')
+        session.commit()
+
+    return general_token.access_token
 
 
 @app.route('/api/v1/tasks/<int:task_id>', methods=['GET'])
@@ -97,6 +115,7 @@ def create_user():
     refresh_token = request.form['refresh_token']
     strava_id = request.form['strava_id']
     apns_token = request.form['apns_token']
+    mileage = request.form['mileage']
     access_expires_at = datetime.datetime.fromtimestamp(int(request.form['access_expires_at']))
     token = Tokens(
         access_token=access_token,
@@ -106,7 +125,7 @@ def create_user():
     )
     session.add(token)
     session.commit()
-    user = User(token=token.id, strava_id=strava_id)
+    user = User(token=token.id, strava_id=strava_id, mileage=mileage)
     session.add(user)
     session.commit()
     return jsonify({'user': user.id}), 201
@@ -127,10 +146,10 @@ def post_strava_callback():
     owner_id = request.form.get('owner_id')
     event_time = datetime.datetime.fromtimestamp(int(request.form['event_time']))
     if object_type == 'activity':
-        distance = strava_api.get_athlete_stats(owner_id)
         user = session.query(User).filter_by(strava_id=int(owner_id)).first()
         if not user:
             return 'User not found', 404
+        distance = strava_api.get_athlete_stats(user)
         user_distance = user.mileage if user.mileage else 0
         diff_distance = distance - user_distance
         if diff_distance > 0:

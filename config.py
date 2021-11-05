@@ -26,3 +26,5 @@ POSTGRES_DB = env('POSTGRES_DB')
 # APNS data
 APNS_TOPIC = env('APNS_TOPIC', 'com.example.App')
 APNS_KEY = env('APNS_KEY', 'key.pem')
+
+TOKEN_ID = 1

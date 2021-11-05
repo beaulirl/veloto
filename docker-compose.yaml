@@ -25,7 +25,9 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/veloto.conf:/etc/nginx/conf.d/veloto.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt
     depends_on:
       - api
     ports:
-      - "80:80"
+      - 80:80
+      - 443:443

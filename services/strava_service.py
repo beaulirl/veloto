@@ -7,7 +7,7 @@ from config import (
     STRAVA_VERIFY_TOKEN,
     CALLBACK_URL
 )
-from app import token
+from app import get_user_token
 
 
 class StravaAPI:
@@ -31,6 +31,7 @@ class StravaAPI:
 
     def get_athlete_stats(self, user):
         url = f'{STRAVA_BASE_URL}/athletes/{user.strava_id}/stats'
+        token = get_user_token(user)
         if not token:
             return 0
         headers = {'Authorization': f'Bearer {token}'}

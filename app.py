@@ -18,9 +18,8 @@ def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
 
 
-@property
-def token():
-    general_token = session.query(Tokens).filter_by(id=TOKEN_ID).first()
+def get_user_token(user):
+    general_token = session.query(Tokens).filter_by(id=user.token_id).first()
     if general_token.timestamp < datetime.datetime.now().timestamp():
         token_info = strava_api.update_expired_token(general_token.refresh_token)
 
@@ -115,7 +114,6 @@ def create_user():
     refresh_token = request.form['refresh_token']
     strava_id = request.form['strava_id']
     apns_token = request.form['apns_token']
-    mileage = request.form['mileage']
     access_expires_at = datetime.datetime.fromtimestamp(int(request.form['access_expires_at']))
     token = Tokens(
         access_token=access_token,
@@ -125,8 +123,9 @@ def create_user():
     )
     session.add(token)
     session.commit()
-    user = User(token=token.id, strava_id=strava_id, mileage=mileage)
+    user = User(token=token.id, strava_id=strava_id)
     session.add(user)
+    user.mileage = strava_api.get_athlete_stats(user)
     session.commit()
     return jsonify({'user': user.id}), 201
 

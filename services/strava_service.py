@@ -56,7 +56,7 @@ class StravaAPI:
             return response.json()
 
     def get_user_token(self, user):
-        general_token = session.query(Tokens).filter_by(id=user.token.id).first()
+        general_token = session.query(Tokens).filter_by(id=user.token).first()
         if general_token.timestamp < datetime.datetime.now().timestamp():
             token_info = self.update_expired_token(general_token.refresh_token)
 

@@ -26,7 +26,7 @@ class StravaAPI:
             data,
             timeout=1
         )
-        if response.status_code == 200:
+        if response.status_code == 201:
             result = response.json()
             return result.get('id')
         return 'There was an error strava create subscription', response.status_code

@@ -1,7 +1,7 @@
 import datetime
 from flask import Flask, make_response, jsonify, request
 from db.models import Task, Tokens, User, StravaEvent
-from config import STRAVA_VERIFY_TOKEN, TOKEN_ID
+from config import STRAVA_VERIFY_TOKEN
 
 app = Flask(__name__)
 
@@ -16,22 +16,6 @@ notification = Notification()
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
-
-
-def get_user_token(user):
-    general_token = session.query(Tokens).filter_by(id=user.token_id).first()
-    if general_token.timestamp < datetime.datetime.now().timestamp():
-        token_info = strava_api.update_expired_token(general_token.refresh_token)
-
-        if not token_info:
-            return
-
-        general_token.access_token = token_info.get('access_token')
-        general_token.refresh_token = token_info.get('refresh_token')
-        general_token.timestamp = token_info.get('expires_at')
-        session.commit()
-
-    return general_token.access_token
 
 
 @app.route('/api/v1/tasks/<int:task_id>', methods=['GET'])

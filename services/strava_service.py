@@ -1,3 +1,4 @@
+import datetime
 import requests
 
 from config import (
@@ -7,7 +8,8 @@ from config import (
     STRAVA_VERIFY_TOKEN,
     CALLBACK_URL
 )
-from app import get_user_token
+from db.config import session
+from db.models import Tokens
 
 
 class StravaAPI:
@@ -31,7 +33,7 @@ class StravaAPI:
 
     def get_athlete_stats(self, user):
         url = f'{STRAVA_BASE_URL}/athletes/{user.strava_id}/stats'
-        token = get_user_token(user)
+        token = self.get_user_token(user)
         if not token:
             return 0
         headers = {'Authorization': f'Bearer {token}'}
@@ -52,3 +54,18 @@ class StravaAPI:
         response = requests.post(url, data, timeout=1)
         if response.status_code == 200:
             return response.json()
+
+    def get_user_token(self, user):
+        general_token = session.query(Tokens).filter_by(id=user.token_id).first()
+        if general_token.timestamp < datetime.datetime.now().timestamp():
+            token_info = self.update_expired_token(general_token.refresh_token)
+
+            if not token_info:
+                return
+
+            general_token.access_token = token_info.get('access_token')
+            general_token.refresh_token = token_info.get('refresh_token')
+            general_token.timestamp = token_info.get('expires_at')
+            session.commit()
+
+        return general_token.access_token

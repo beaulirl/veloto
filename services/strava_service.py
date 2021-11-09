@@ -52,7 +52,7 @@ class StravaAPI:
             'refresh_token': refresh_token
         }
         response = requests.post(url, data, timeout=1)
-        if response.status_code == 200:
+        if response.status_code == 201:
             return response.json()
 
     def get_user_token(self, user):

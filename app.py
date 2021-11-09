@@ -98,7 +98,7 @@ def create_user():
     refresh_token = request.form['refresh_token']
     strava_id = request.form['strava_id']
     apns_token = request.form['apns_token']
-    access_expires_at = datetime.datetime.fromtimestamp(int(request.form['access_expires_at']))
+    access_expires_at = request.form['access_expires_at']
     token = Tokens(
         access_token=access_token,
         refresh_token=refresh_token,
@@ -109,7 +109,8 @@ def create_user():
     session.commit()
     user = User(token=token.id, strava_id=strava_id)
     session.add(user)
-    user.mileage = strava_api.get_athlete_stats(user)
+    user_stats = strava_api.get_athlete_stats(user)
+    user.mileage = user_stats['all_ride_totals']['distance']
     session.commit()
     return jsonify({'user': user.id}), 201
 
@@ -132,7 +133,8 @@ def post_strava_callback():
         user = session.query(User).filter_by(strava_id=int(owner_id)).first()
         if not user:
             return 'User not found', 404
-        distance = strava_api.get_athlete_stats(user)
+        user_stats = strava_api.get_athlete_stats(user)
+        distance = user_stats['recent_run_totals']['distance']
         user_distance = user.mileage if user.mileage else 0
         diff_distance = distance - user_distance
         if diff_distance > 0:

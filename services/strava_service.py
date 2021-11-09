@@ -37,10 +37,9 @@ class StravaAPI:
         if not token:
             return 0
         headers = {'Authorization': f'Bearer {token}'}
-        response = requests.get(url, headers, timeout=1)
+        response = requests.get(url, headers=headers, timeout=1)
         if response.status_code == 200:
-            result = response.json()
-            return result['recent_ride_totals']['distance']
+            return response.json()
         return 0
 
     def update_expired_token(self, refresh_token):
@@ -57,15 +56,14 @@ class StravaAPI:
 
     def get_user_token(self, user):
         general_token = session.query(Tokens).filter_by(id=user.token).first()
-        if general_token.access_expires_at < datetime.datetime.now():
+        if general_token.access_expires_at < datetime.datetime.now().timestamp():
             token_info = self.update_expired_token(general_token.refresh_token)
-
             if not token_info:
                 return
 
             general_token.access_token = token_info.get('access_token')
             general_token.refresh_token = token_info.get('refresh_token')
-            general_token.timestamp = token_info.get('expires_at')
+            general_token.access_expires_at = token_info.get('expires_at')
             session.commit()
 
         return general_token.access_token

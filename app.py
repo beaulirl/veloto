@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from flask import Flask, make_response, jsonify, request
 from db.models import Task, Tokens, User, StravaEvent
 from config import STRAVA_VERIFY_TOKEN
@@ -98,7 +98,7 @@ def create_user():
     refresh_token = request.form['refresh_token']
     strava_id = request.form['strava_id']
     apns_token = request.form['apns_token']
-    access_expires_at = request.form['access_expires_at']
+    access_expires_at = datetime.fromtimestamp(int(request.form['access_expires_at'])).timestamp()
     token = Tokens(
         access_token=access_token,
         refresh_token=refresh_token,
@@ -128,7 +128,7 @@ def get_strava_callback():
 def post_strava_callback():
     object_type = request.form.get('object_type')
     owner_id = request.form.get('owner_id')
-    event_time = datetime.datetime.fromtimestamp(int(request.form['event_time']))
+    event_time = datetime.fromtimestamp(int(request.form['event_time'])).timestamp()
     if object_type == 'activity':
         user = session.query(User).filter_by(strava_id=int(owner_id)).first()
         if not user:

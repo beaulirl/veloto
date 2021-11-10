@@ -1,10 +1,7 @@
 import os
-import pytz
 from dotenv import load_dotenv
 
 load_dotenv()
-
-tz = pytz.timezone('Europe/Moscow')
 
 
 def env(param, default=''):

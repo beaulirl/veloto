@@ -1,9 +1,7 @@
-from datetime import datetime
 import requests
 
 
 from config import (
-    tz,
     CLIENT_ID,
     CLIENT_SECRET,
     STRAVA_BASE_URL,
@@ -58,14 +56,13 @@ class StravaAPI:
 
     def get_user_token(self, user):
         general_token = session.query(Tokens).filter_by(id=user.token).first()
-        if general_token.access_expires_at < datetime.now(tz).timestamp():
-            token_info = self.update_expired_token(general_token.refresh_token)
-            if not token_info:
-                return
+        token_info = self.update_expired_token(general_token.refresh_token)
+        if not token_info:
+            return
 
-            general_token.access_token = token_info.get('access_token')
-            general_token.refresh_token = token_info.get('refresh_token')
-            general_token.access_expires_at = token_info.get('expires_at')
-            session.commit()
+        general_token.access_token = token_info.get('access_token')
+        general_token.refresh_token = token_info.get('refresh_token')
+        general_token.access_expires_at = token_info.get('expires_at')
+        session.commit()
 
         return general_token.access_token

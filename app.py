@@ -98,7 +98,7 @@ def create_user():
     refresh_token = request.form['refresh_token']
     strava_id = request.form['strava_id']
     apns_token = request.form['apns_token']
-    access_expires_at = datetime.fromtimestamp(int(request.form['access_expires_at'])).timestamp()
+    access_expires_at = datetime.fromtimestamp(int(request.form['access_expires_at']))
     token = Tokens(
         access_token=access_token,
         refresh_token=refresh_token,
@@ -128,7 +128,7 @@ def get_strava_callback():
 def post_strava_callback():
     object_type = request.form.get('object_type')
     owner_id = request.form.get('owner_id')
-    event_time = datetime.fromtimestamp(int(request.form['event_time'])).timestamp()
+    event_time = datetime.fromtimestamp(int(request.form['event_time']))
     if object_type == 'activity':
         user = session.query(User).filter_by(strava_id=int(owner_id)).first()
         if not user:

@@ -134,7 +134,7 @@ def post_strava_callback():
         if not user:
             return 'User not found', 404
         user_stats = strava_api.get_athlete_stats(user)
-        distance = user_stats['recent_run_totals']['distance'] if user_stats else 0
+        distance = user_stats['recent_ride_totals']['distance'] if user_stats else 0
         user_distance = user.mileage if user.mileage else 0
         diff_distance = distance - user_distance
         if diff_distance > 0:

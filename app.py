@@ -137,7 +137,8 @@ def post_strava_callback():
         user_stats = strava_api.get_athlete_stats(user)
         total_distance = user_stats['recent_ride_totals']['distance'] if user_stats else 0
         user.mileage = total_distance
-        recent_distance = strava_api.get_activity_info(object_id, user)
+        activity_info = strava_api.get_activity_info(object_id, user)
+        recent_distance = activity_info['distance'] if activity_info else 0
         diff_distance = total_distance - recent_distance
         if diff_distance > 0:
             event = StravaEvent(user_id=user.id, event_km=diff_distance, event_time=event_time)

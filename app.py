@@ -128,15 +128,17 @@ def get_strava_callback():
 def post_strava_callback():
     object_type = request.json.get('object_type')
     owner_id = request.json.get('owner_id')
+    object_id = request.json.get('object_id')
     event_time = datetime.fromtimestamp(int(request.json['event_time']))
     if object_type == 'activity':
         user = session.query(User).filter_by(strava_id=int(owner_id)).first()
         if not user:
             return 'User not found', 404
         user_stats = strava_api.get_athlete_stats(user)
-        distance = user_stats['recent_ride_totals']['distance'] if user_stats else 0
-        user_distance = user.mileage if user.mileage else 0
-        diff_distance = distance - user_distance
+        total_distance = user_stats['recent_ride_totals']['distance'] if user_stats else 0
+        user.mileage = total_distance
+        recent_distance = strava_api.get_activity_info(object_id, user)
+        diff_distance = total_distance - recent_distance
         if diff_distance > 0:
             event = StravaEvent(user_id=user.id, event_km=diff_distance, event_time=event_time)
             session.add(event)

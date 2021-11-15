@@ -42,6 +42,17 @@ class StravaAPI:
             return response.json()
         return 0
 
+    def get_activity_info(self, activity_id, user):
+        url = f'{STRAVA_BASE_URL}/activities/{activity_id}'
+        token = self.get_user_token(user)
+        if not token:
+            return 0
+        headers = {'Authorization': f'Bearer {token}'}
+        response = requests.get(url, headers=headers, timeout=1)
+        if response.status_code == 200:
+            return response.json()
+        return 0
+
     def update_expired_token(self, refresh_token):
         url = f'{STRAVA_BASE_URL}/oauth/token'
         data = {

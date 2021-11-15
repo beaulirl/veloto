@@ -26,9 +26,10 @@ class Notification:
             session.commit()
 
     def send_push_notification(self, comment, user):
-        user_token = session.query(Tokens).filter_by(id=user.token_id).first()
+        user_token = session.query(Tokens).filter_by(id=user.token).first()
         if not user_token and not user_token.apns_token:
             return
-        payload = Payload(alert=comment, sound="default", badge=1)
-        client = APNsClient(APNS_KEY, use_sandbox=False, use_alternative_port=False)
-        client.send_notification(user_token.apns_token, payload, APNS_TOPIC)
+        print('Notification sending')
+        # payload = Payload(alert=comment, sound="default", badge=1)
+        # client = APNsClient(APNS_KEY, use_sandbox=False, use_alternative_port=False)
+        # client.send_notification(user_token.apns_token, payload, APNS_TOPIC)

@@ -1,5 +1,5 @@
 import requests
-
+from datetime import datetime
 
 from config import (
     CLIENT_ID,
@@ -51,7 +51,7 @@ class StravaAPI:
             'refresh_token': refresh_token
         }
         response = requests.post(url, data, timeout=1)
-        if response.status_code == 201:
+        if response.status_code == 200:
             return response.json()
 
     def get_user_token(self, user):
@@ -62,7 +62,7 @@ class StravaAPI:
 
         general_token.access_token = token_info.get('access_token')
         general_token.refresh_token = token_info.get('refresh_token')
-        general_token.access_expires_at = token_info.get('expires_at')
+        general_token.access_expires_at = datetime.fromtimestamp(int(token_info.get('expires_at')))
         session.commit()
 
         return general_token.access_token

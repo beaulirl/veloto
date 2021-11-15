@@ -139,12 +139,11 @@ def post_strava_callback():
         user.mileage = total_distance
         activity_info = strava_api.get_activity_info(object_id, user)
         recent_distance = activity_info['distance'] if activity_info else 0
-        diff_distance = total_distance - recent_distance
-        if diff_distance > 0:
-            event = StravaEvent(user_id=user.id, event_km=diff_distance, event_time=event_time)
+        if recent_distance > 0:
+            event = StravaEvent(user_id=user.id, event_km=recent_distance, event_time=event_time)
             session.add(event)
             session.commit()
-            notification.calculate_event_diff(user, diff_distance)
+            notification.calculate_event_diff(user, recent_distance)
         return jsonify({'user': user.id}), 200
 
 

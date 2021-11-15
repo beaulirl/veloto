@@ -126,9 +126,9 @@ def get_strava_callback():
 
 @app.route('/callback_strava', methods=['POST'])
 def post_strava_callback():
-    object_type = request.form.get('object_type')
-    owner_id = request.form.get('owner_id')
-    event_time = datetime.fromtimestamp(int(request.form['event_time']))
+    object_type = request.json.get('object_type')
+    owner_id = request.json.get('owner_id')
+    event_time = datetime.fromtimestamp(int(request.json['event_time']))
     if object_type == 'activity':
         user = session.query(User).filter_by(strava_id=int(owner_id)).first()
         if not user:

@@ -12,7 +12,7 @@ class Notification:
             old_notification = session.query(Notifications).filter_by(task_id=task.id, user_id=user.id).first()
             diff = old_notification.diff if old_notification else 0
             amount = diff_distance + diff
-            if amount > task.every:
+            if amount >= task.every:
                 self.send_push_notification(task.comment, user)
                 new_diff = amount - task.every
             else:

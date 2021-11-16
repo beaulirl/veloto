@@ -12,6 +12,8 @@ from services.notification_service import Notification
 strava_api = StravaAPI()
 notification = Notification()
 
+default_tasks_list = (1, 2, 3)
+
 
 @app.errorhandler(404)
 def not_found(error):
@@ -92,6 +94,12 @@ def get_tasks():
     return jsonify({'tasks': [task.to_dict() for task in user.tasks]})
 
 
+def add_defaults_tasks_for_user(user):
+    default_tasks = session.query(Task).filter(Task.id.in_(default_tasks_list)).all()
+    for task in default_tasks:
+        user.tasks.append(task)
+
+
 @app.route('/api/v1/users', methods=['POST'])
 def create_user():
     access_token = request.form['access_token']
@@ -110,9 +118,14 @@ def create_user():
     user = User(token=token.id, strava_id=strava_id)
     session.add(user)
     user_stats = strava_api.get_athlete_stats(user)
+    add_defaults_tasks_for_user(user)
     user.mileage = user_stats['all_ride_totals']['distance'] if user_stats else 0
     session.commit()
-    return jsonify({'user': user.id}), 201
+    return jsonify({
+        'user': user.id,
+        'mileage': user.mileage,
+        'tasks': [task.to_dict() for task in user.tasks]
+    }), 201
 
 
 @app.route('/callback_strava', methods=['GET'])

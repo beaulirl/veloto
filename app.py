@@ -34,9 +34,9 @@ def get_task(task_id):
 
 @app.route('/api/v1/tasks', methods=['POST'])
 def create_task():
-    task_name = request.form['name']
-    task_repeat = request.form['every']
-    task_comment = request.form['comment']
+    task_name = request.json['name']
+    task_repeat = request.json['every']
+    task_comment = request.json['comment']
     user_id = request.args.get('user_id')
     user = session.query(User).filter_by(id=user_id).first()
     if not user:
@@ -50,9 +50,9 @@ def create_task():
 
 @app.route('/api/v1/tasks/<int:task_id>', methods=['PUT'])
 def update_task(task_id):
-    new_name = request.form.get('name')
-    new_every = request.form.get('every')
-    new_comment = request.form.get('comment')
+    new_name = request.json.get('name')
+    new_every = request.json.get('every')
+    new_comment = request.json.get('comment')
     user_id = request.args.get('user_id')
     user = session.query(User).filter_by(id=user_id).first()
     if not user:
@@ -102,11 +102,11 @@ def add_defaults_tasks_for_user(user):
 
 @app.route('/api/v1/users', methods=['POST'])
 def create_user():
-    access_token = request.form['access_token']
-    refresh_token = request.form['refresh_token']
-    strava_id = request.form['strava_id']
-    apns_token = request.form['apns_token']
-    access_expires_at = datetime.fromtimestamp(int(request.form['access_expires_at']))
+    access_token = request.json['access_token']
+    refresh_token = request.json['refresh_token']
+    strava_id = request.json['strava_id']
+    apns_token = request.json['apns_token']
+    access_expires_at = datetime.fromtimestamp(int(request.json['access_expires_at']))
     token = Tokens(
         access_token=access_token,
         refresh_token=refresh_token,

@@ -99,6 +99,17 @@ def add_defaults_tasks_for_user(user):
     for task in default_tasks:
         user.tasks.append(task)
 
+@app.route('/api/v1/users', methods=['DELETE'])
+def delete_users():
+    deleted = session.query(User).delete()
+    session.commit()
+    return jsonify({'result': f'Deleted {deleted} users'})
+
+@app.route('/api/v1/users/<int:user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    deleted = session.query(User).filter_by(id=user_id).delete()
+    session.commit()
+    return jsonify({'result': f'Deleted user'})
 
 @app.route('/api/v1/users', methods=['POST'])
 def create_user():

@@ -1,4 +1,4 @@
-from db.models import Notifications, Tokens
+from db.models import Notifications, Tokens, Task
 from db.config import session
 from apns2.client import APNsClient
 from apns2.payload import Payload
@@ -7,22 +7,19 @@ from config import APNS_KEY, APNS_TOPIC
 
 class Notification:
 
-    def calculate_event_diff(self, user, diff_distance):
-        for task in user.tasks:
-            old_notification = session.query(Notifications).filter_by(task_id=task.id, user_id=user.id).first()
-            diff = old_notification.diff if old_notification else 0
-            amount = diff_distance + diff
+    def calculate_event_diff(self, user, diff_distance=0):
+        tasks = session.query(Task).filter_by(user_id=user.id).all()
+        for task in tasks:
+            amount = diff_distance + task.remain
             if amount >= task.every:
                 self.send_push_notification(task.comment, user)
+                notification = Notifications(task_id=task.id, user_id=user.id)
+                session.add(notification)
                 new_diff = amount - task.every
             else:
-                new_diff = diff_distance + diff
+                new_diff = amount
+            task.remain = new_diff
 
-            if old_notification:
-                old_notification.diff = new_diff
-            else:
-                notification = Notifications(task_id=task.id, user_id=user.id, diff=new_diff)
-                session.add(notification)
             session.commit()
 
     def send_push_notification(self, comment, user):

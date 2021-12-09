@@ -5,13 +5,11 @@ from sqlalchemy import (
     Integer,
     MetaData,
     String,
-    Table,
-    UniqueConstraint,
     func,
     TIMESTAMP,
 
 )
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.orm import declarative_base
 from sqlalchemy_serializer import SerializerMixin
 
 convention = {
@@ -39,24 +37,15 @@ class Tokens(Base):
     apns_token = Column("apns_token", String)
 
 
-user_task_table = Table(
-    "user_task",
-    Base.metadata,
-    Column("user_id", Integer, ForeignKey("user.id", ondelete="CASCADE")),
-    Column("task_id", Integer, ForeignKey("task.id", ondelete="CASCADE")),
-    UniqueConstraint("user_id", "task_id", name="uix_1"),
-)
-
-
 class User(Base):
     __tablename__ = "user"
 
     id = Column("id", Integer, primary_key=True)
     strava_id = Column("strava_id", Integer)
-    token = Column(
+    token_id = Column(
         "token_id", ForeignKey("tokens.id", ondelete="CASCADE")
     )
-    mileage = Column("mileage", Integer)
+    mileage = Column("mileage", Integer, default=0)
     created_at = Column(
         "created_at", DateTime, server_default=func.now(), nullable=False
     )
@@ -67,7 +56,6 @@ class User(Base):
         onupdate=func.now(),
         nullable=False,
     )
-    tasks = relationship("Task", secondary=user_task_table)
 
 
 class Task(Base, SerializerMixin):
@@ -76,9 +64,13 @@ class Task(Base, SerializerMixin):
     serialize_only = ('name', 'every', 'comment')
 
     id = Column("id", Integer, primary_key=True)
+    user = Column(
+        "user_id", ForeignKey("user.id", ondelete="CASCADE")
+    )
     name = Column("name", String)
     every = Column("every", Integer)
     comment = Column("comment", String)
+    remain = Column("remain", Integer, default=0)
 
 
 class Notifications(Base):
@@ -91,7 +83,6 @@ class Notifications(Base):
     task_id = Column(
         "task_id", ForeignKey("task.id", ondelete="CASCADE")
     )
-    diff = Column("diff", Integer)
 
 
 class StravaEvent(Base):
@@ -101,7 +92,7 @@ class StravaEvent(Base):
     user_id = Column(
         "user_id", ForeignKey("user.id", ondelete="CASCADE")
     )
-    event_km = Column("event_km", Integer)
+    distance = Column("distance", Integer)
     event_time = Column("event_time", TIMESTAMP(timezone=False), nullable=False)
 
 

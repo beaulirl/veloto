@@ -12,7 +12,11 @@ from services.notification_service import Notification
 strava_api = StravaAPI()
 notification = Notification()
 
-default_tasks_list = (1, 2, 3)
+default_tasks_list = (
+    ('Смазать цепь', 10000),
+    ('Проверить колодки', 12500),
+    ('Заменить ролики заднего переключателя', 300000)
+)
 
 
 @app.errorhandler(404)
@@ -41,9 +45,8 @@ def create_task():
     user = session.query(User).filter_by(id=user_id).first()
     if not user:
         return 'User not found', 404
-    task = Task(name=task_name, every=task_repeat, comment=task_comment)
+    task = Task(name=task_name, every=task_repeat, comment=task_comment, user_id=user_id)
     session.add(task)
-    user.tasks.append(task)
     session.commit()
     return jsonify({'task': task.id}), 201
 
@@ -68,6 +71,8 @@ def update_task(task_id):
         task.comment = new_comment
     session.add(task)
     session.commit()
+    if new_every:
+        notification.calculate_event_diff(task.user)
     return jsonify({'task': task.id})
 
 
@@ -88,16 +93,14 @@ def delete_task(task_id):
 @app.route('/api/v1/tasks', methods=['GET'])
 def get_tasks():
     user_id = request.args.get('user_id')
-    user = session.query(User).filter_by(id=user_id).first()
-    if not user:
-        return 'User not found', 404
-    return jsonify({'tasks': [task.to_dict() for task in user.tasks]})
+    tasks = session.query(Task).filter_by(user_id=user_id).all()
+    return jsonify({'tasks': [task.to_dict() for task in tasks]})
 
 
 def add_defaults_tasks_for_user(user):
-    default_tasks = session.query(Task).filter(Task.id.in_(default_tasks_list)).all()
-    for task in default_tasks:
-        user.tasks.append(task)
+    for value in default_tasks_list:
+        session.add(Task(name=value[0], every=value[1], user_id=user.id))
+    session.commit()
 
 
 @app.route('/api/v1/users', methods=['POST'])
@@ -121,10 +124,11 @@ def create_user():
     add_defaults_tasks_for_user(user)
     user.mileage = user_stats['all_ride_totals']['distance'] if user_stats else 0
     session.commit()
+    tasks = session.query(Task).filter_by(user_id=user.id).all()
     return jsonify({
         'user': user.id,
         'mileage': user.mileage,
-        'tasks': [task.to_dict() for task in user.tasks]
+        'tasks': [task.to_dict() for task in tasks]
     }), 201
 
 
@@ -153,11 +157,10 @@ def post_strava_callback():
         activity_info = strava_api.get_activity_info(object_id, user)
         recent_distance = activity_info['distance'] if activity_info else 0
         if recent_distance > 0:
-            event = StravaEvent(user_id=user.id, event_km=recent_distance, event_time=event_time)
+            event = StravaEvent(user_id=user.id, distance=recent_distance, event_time=event_time)
             session.add(event)
             session.commit()
             notification.calculate_event_diff(user, recent_distance)
-        return jsonify({'user': user.id}), 200
 
 
 if __name__ == '__main__':

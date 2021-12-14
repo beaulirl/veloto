@@ -26,7 +26,7 @@ class Notification:
             self.check_task_amount(task, user, diff_distance)
 
     def send_push_notification(self, comment, user):
-        user_token = session.query(Tokens).filter_by(id=user.token).first()
+        user_token = session.query(Tokens).filter_by(id=user.token_id).first()
         if not user_token and not user_token.apns_token:
             return
         print('Notification sending')

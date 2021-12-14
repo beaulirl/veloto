@@ -61,10 +61,10 @@ class User(Base):
 class Task(Base, SerializerMixin):
     __tablename__ = "task"
 
-    serialize_only = ('name', 'every', 'comment')
+    serialize_only = ('name', 'every', 'comment', 'remain')
 
     id = Column("id", Integer, primary_key=True)
-    user = Column(
+    user_id = Column(
         "user_id", ForeignKey("user.id", ondelete="CASCADE")
     )
     name = Column("name", String)

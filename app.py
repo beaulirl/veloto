@@ -31,7 +31,9 @@ def get_task(task_id):
     if not user:
         return 'User not found', 404
     task = session.query(Task).filter_by(id=task_id).first()
-    if task not in user.tasks:
+    if not task:
+        return 'Task not found', 404
+    if user.id != task.user_id:
         return 'Unauthorized', 403
     return jsonify({'task': task.to_dict()})
 
@@ -61,7 +63,9 @@ def update_task(task_id):
     if not user:
         return 'User not found', 404
     task = session.query(Task).filter_by(id=task_id).first()
-    if task not in user.tasks:
+    if not task:
+        return 'Task not found', 404
+    if user.id != task.user_id:
         return 'Unauthorized', 403
     if new_name:
         task.name = new_name
@@ -72,7 +76,7 @@ def update_task(task_id):
     session.add(task)
     session.commit()
     if new_every:
-        notification.calculate_event_diff(task.user)
+        notification.calculate_event_diff(task.user_id)
     return jsonify({'task': task.id})
 
 
@@ -83,7 +87,9 @@ def delete_task(task_id):
     if not user:
         return 'User not found', 404
     task = session.query(Task).filter_by(id=task_id).first()
-    if task not in user.tasks:
+    if not task:
+        return 'Task not found', 404
+    if user.id != task.user_id:
         return 'Unauthorized', 403
     session.delete(task)
     session.commit()
@@ -102,17 +108,20 @@ def add_defaults_tasks_for_user(user):
         session.add(Task(name=value[0], every=value[1], user_id=user.id))
     session.commit()
 
+
 @app.route('/api/v1/users', methods=['DELETE'])
 def delete_users():
     deleted = session.query(User).delete()
     session.commit()
     return jsonify({'result': f'Deleted {deleted} users'})
 
+
 @app.route('/api/v1/users/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
-    deleted = session.query(User).filter_by(id=user_id).delete()
+    session.query(User).filter_by(id=user_id).delete()
     session.commit()
     return jsonify({'result': f'Deleted user'})
+
 
 @app.route('/api/v1/users', methods=['POST'])
 def create_user():
@@ -129,7 +138,7 @@ def create_user():
     )
     session.add(token)
     session.commit()
-    user = User(token=token.id, strava_id=strava_id)
+    user = User(token_id=token.id, strava_id=strava_id)
     session.add(user)
     user_stats = strava_api.get_athlete_stats(user)
     add_defaults_tasks_for_user(user)

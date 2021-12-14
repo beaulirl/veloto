@@ -7,13 +7,13 @@ from config import APNS_KEY, APNS_TOPIC
 
 class Notification:
 
-    def calculate_event_diff(self, user, diff_distance=0):
-        tasks = session.query(Task).filter_by(user_id=user.id).all()
+    def calculate_event_diff(self, user_id, diff_distance=0):
+        tasks = session.query(Task).filter_by(user_id=user_id).all()
         for task in tasks:
             amount = diff_distance + task.remain
             if amount >= task.every:
-                self.send_push_notification(task.comment, user)
-                notification = Notifications(task_id=task.id, user_id=user.id)
+                self.send_push_notification(task.comment, user_id)
+                notification = Notifications(task_id=task.id, user_id=user_id)
                 session.add(notification)
                 new_diff = amount - task.every
             else:

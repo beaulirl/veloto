@@ -181,6 +181,7 @@ def post_strava_callback():
             session.add(event)
             session.commit()
             notification.calculate_event_diff(user, recent_distance)
+    return jsonify({'result': f'Strava callback finishes for strava_id {owner_id}'})
 
 
 if __name__ == '__main__':

@@ -76,7 +76,7 @@ def update_task(task_id):
     session.add(task)
     session.commit()
     if new_every:
-        notification.calculate_event_diff(task.user_id)
+        notification.check_task_amount(task, user)
     return jsonify({'task': task.id})
 
 
@@ -180,7 +180,7 @@ def post_strava_callback():
             event = StravaEvent(user_id=user.id, distance=recent_distance, event_time=event_time)
             session.add(event)
             session.commit()
-            notification.calculate_event_diff(user.id, recent_distance)
+            notification.calculate_event_diff(user, recent_distance)
 
 
 if __name__ == '__main__':

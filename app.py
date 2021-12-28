@@ -123,7 +123,7 @@ def delete_user(user_id):
     return jsonify({'result': f'Deleted user'})
 
 
-@app.route('/api/v1/tasks/<int:task_id>', methods=['PATCH'])
+@app.route('/api/v1/tasks/<int:task_id>/remain', methods=['PATCH'])
 def patch_task_remain(task_id):
     user_id = request.args.get('user_id')
     user = session.query(User).filter_by(id=user_id).first()

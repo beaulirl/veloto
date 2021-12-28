@@ -123,6 +123,22 @@ def delete_user(user_id):
     return jsonify({'result': f'Deleted user'})
 
 
+@app.route('/api/v1/tasks/<int:task_id>', methods=['PATCH'])
+def patch_task_remain(task_id):
+    user_id = request.args.get('user_id')
+    user = session.query(User).filter_by(id=user_id).first()
+    if not user:
+        return 'User not found', 404
+    task = session.query(Task).filter_by(id=task_id).first()
+    if not task:
+        return 'Task not found', 404
+    if user.id != task.user_id:
+        return 'Unauthorized', 403
+    task.remain = 0
+    session.commit()
+    return jsonify({'result': f'Task {task_id} remain was set to 0'})
+
+
 @app.route('/api/v1/users', methods=['POST'])
 def create_user():
     access_token = request.json['access_token']

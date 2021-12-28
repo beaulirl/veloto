@@ -7,8 +7,8 @@ from config import APNS_KEY, APNS_TOPIC
 
 class Notification:
 
-    def check_task_amount(self, task, user, diff_distance=0):
-        amount = diff_distance + task.remain
+    def check_task_amount(self, task, user, recent_distance=0):
+        amount = recent_distance + task.remain
         if amount >= task.every:
             self.send_push_notification(task.comment, user)
             notification = Notifications(task_id=task.id, user_id=user.id)
@@ -20,10 +20,10 @@ class Notification:
 
         session.commit()
 
-    def calculate_event_diff(self, user, diff_distance=0):
+    def calculate_event_diff(self, user, recent_distance=0):
         tasks = session.query(Task).filter_by(user_id=user.id).all()
         for task in tasks:
-            self.check_task_amount(task, user, diff_distance)
+            self.check_task_amount(task, user, recent_distance)
 
     def send_push_notification(self, comment, user):
         user_token = session.query(Tokens).filter_by(id=user.token_id).first()

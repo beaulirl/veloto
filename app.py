@@ -59,6 +59,7 @@ def update_task(task_id):
     new_every = request.json.get('every')
     new_comment = request.json.get('comment')
     user_id = request.args.get('user_id')
+    remain = request.args.get('remain')
     user = session.query(User).filter_by(id=user_id).first()
     if not user:
         return 'User not found', 404
@@ -73,6 +74,8 @@ def update_task(task_id):
         task.every = new_every
     if new_comment:
         task.comment = new_comment
+    if remain:
+        task.remain = remain
     session.add(task)
     session.commit()
     if new_every:

@@ -148,21 +148,23 @@ def create_user():
     refresh_token = request.json['refresh_token']
     strava_id = request.json['strava_id']
     apns_token = request.json['apns_token']
-    access_expires_at = datetime.fromtimestamp(int(request.json['access_expires_at']))
-    token = Tokens(
-        access_token=access_token,
-        refresh_token=refresh_token,
-        access_expires_at=access_expires_at,
-        apns_token=apns_token
-    )
-    session.add(token)
-    session.commit()
-    user = User(token_id=token.id, strava_id=strava_id)
-    session.add(user)
-    user_stats = strava_api.get_athlete_stats(user)
-    add_defaults_tasks_for_user(user)
-    user.mileage = user_stats['all_ride_totals']['distance'] if user_stats else 0
-    session.commit()
+    user = session.query(User).filter_by(strava_id=strava_id).first()
+    if not user:
+        access_expires_at = datetime.fromtimestamp(int(request.json['access_expires_at']))
+        token = Tokens(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            access_expires_at=access_expires_at,
+            apns_token=apns_token
+        )
+        session.add(token)
+        session.commit()
+        user = User(token_id=token.id, strava_id=strava_id)
+        session.add(user)
+        user_stats = strava_api.get_athlete_stats(user)
+        add_defaults_tasks_for_user(user)
+        user.mileage = user_stats['all_ride_totals']['distance'] if user_stats else 0
+        session.commit()
     tasks = session.query(Task).filter_by(user_id=user.id).all()
     return jsonify({
         'user': user.id,

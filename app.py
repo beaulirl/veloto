@@ -190,6 +190,11 @@ def get_strava_callback():
     return 'Token is not verified', 403
 
 
+@app.route('/debug-sentry')
+def trigger_error():
+    division_by_zero = 1 / 0
+
+
 @app.route('/callback_strava', methods=['POST'])
 def post_strava_callback():
     object_type = request.json.get('object_type')

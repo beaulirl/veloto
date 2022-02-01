@@ -1,7 +1,15 @@
+import sentry_sdk
 from datetime import datetime
 from flask import Flask, make_response, jsonify, request
 from db.models import Task, Tokens, User, StravaEvent
 from config import STRAVA_VERIFY_TOKEN
+from sentry_sdk.integrations.flask import FlaskIntegration
+
+sentry_sdk.init(
+    dsn="https://807043debb74448f970e259a2bc6fb48@o1132793.ingest.sentry.io/6178681",
+    integrations=[FlaskIntegration()],
+    traces_sample_rate=1.0
+)
 
 app = Flask(__name__)
 

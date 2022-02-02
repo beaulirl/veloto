@@ -5,17 +5,18 @@ from db.models import Task, Tokens, User, StravaEvent
 from config import STRAVA_VERIFY_TOKEN
 from sentry_sdk.integrations.flask import FlaskIntegration
 
+from db.config import session
+from services.strava_service import StravaAPI
+from services.notification_service import Notification
+
 sentry_sdk.init(
-    dsn="https://807043debb74448f970e259a2bc6fb48@o1132793.ingest.sentry.io/6178681",
+    dsn="https://1478cfc7e9c9466e90b385104282204d@o1132824.ingest.sentry.io/6178762",
     integrations=[FlaskIntegration()],
     traces_sample_rate=1.0
 )
 
 app = Flask(__name__)
 
-from db.config import session
-from services.strava_service import StravaAPI
-from services.notification_service import Notification
 
 strava_api = StravaAPI()
 notification = Notification()
@@ -206,7 +207,7 @@ def post_strava_callback():
         if not user:
             return 'User not found', 404
         user_stats = strava_api.get_athlete_stats(user)
-        total_distance = user_stats['recent_ride_totals']['distance'] if user_stats else 0
+        total_distance = user_stats['all_ride_totals']['distance'] if user_stats else 0
         user.mileage = total_distance
         activity_info = strava_api.get_activity_info(object_id, user)
         recent_distance = activity_info['distance'] if activity_info else 0

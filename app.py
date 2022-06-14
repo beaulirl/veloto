@@ -10,7 +10,7 @@ from services.strava_service import StravaAPI
 from services.notification_service import Notification
 
 sentry_sdk.init(
-    dsn="https://1478cfc7e9c9466e90b385104282204d@o1132824.ingest.sentry.io/6178762",
+    dsn="https://807043debb74448f970e259a2bc6fb48@o1132793.ingest.sentry.io/6178681",
     integrations=[FlaskIntegration()],
     traces_sample_rate=1.0
 )

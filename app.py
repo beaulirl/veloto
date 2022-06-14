@@ -33,6 +33,19 @@ def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
 
 
+@app.route('/api/v1/athlete/', methods=['GET'])
+def get_authlete():
+    user_id = request.args.get('user_id')
+    user = session.query(User).filter_by(id=user_id).first()
+    if not user:
+        return 'User not found', 404
+    tasks = session.query(Task).filter_by(user_id=user.id).all()
+    return jsonify({
+        'user': user.id,
+        'mileage': user.mileage,
+        'tasks': [task.to_dict() for task in tasks]
+    }), 200
+
 @app.route('/api/v1/tasks/<int:task_id>', methods=['GET'])
 def get_task(task_id):
     user_id = request.args.get('user_id')

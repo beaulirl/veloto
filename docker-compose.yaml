@@ -3,6 +3,7 @@ version: "3.8"
 services:
   api:
     build: .
+    command: bash -c "alembic upgrade head && uwsgi uwsgi.ini"
     volumes:
       - ./:/usr/src/app/
     depends_on:

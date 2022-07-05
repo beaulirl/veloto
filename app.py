@@ -1,13 +1,15 @@
-import sentry_sdk
 from datetime import datetime
 from flask import Flask, make_response, jsonify, request
 from db.models import Task, Tokens, User, StravaEvent
 from config import STRAVA_VERIFY_TOKEN
-from sentry_sdk.integrations.flask import FlaskIntegration
+from csv import reader
 
 from db.config import session
 from services.strava_service import StravaAPI
 from services.notification_service import Notification
+
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
 
 sentry_sdk.init(
     dsn="https://19201df010a347ff83bb60bdf224370b@o1132793.ingest.sentry.io/6178681",
@@ -21,11 +23,15 @@ app = Flask(__name__)
 strava_api = StravaAPI()
 notification = Notification()
 
-default_tasks_list = (
-    ('Смазать цепь', 10000),
-    ('Проверить колодки', 12500),
-    ('Заменить ролики заднего переключателя', 300000)
-)
+
+def get_default_tasks_list():
+    default_tasks = []
+    with open('default_tasks.csv', 'r') as default_tasks_file:
+        csv_reader = reader(default_tasks_file)
+        next(csv_reader)
+        for task in csv_reader:
+            default_tasks.append(task)
+    return default_tasks
 
 
 @app.errorhandler(404)
@@ -33,7 +39,7 @@ def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
 
 
-@app.route('/api/v1/athlete/', methods=['GET'])
+@app.route('/api/v1/athlete', methods=['GET'])
 def get_authlete():
     user_id = request.args.get('user_id')
     user = session.query(User).filter_by(id=user_id).first()
@@ -45,6 +51,7 @@ def get_authlete():
         'mileage': user.mileage,
         'tasks': [task.to_dict() for task in tasks]
     }), 200
+
 
 @app.route('/api/v1/tasks/<int:task_id>', methods=['GET'])
 def get_task(task_id):
@@ -129,8 +136,8 @@ def get_tasks():
 
 
 def add_defaults_tasks_for_user(user):
-    for value in default_tasks_list:
-        session.add(Task(name=value[0], every=value[1], user_id=user.id))
+    for value in get_default_tasks_list():
+        session.add(Task(name=value[0], every=value[1], user_id=user.id, comment=value[2]))
     session.commit()
 
 
@@ -206,7 +213,8 @@ def get_strava_callback():
 
 @app.route('/debug-sentry')
 def trigger_error():
-    division_by_zero = 1 / 0
+    raise Exception('nnnn')
+    # division_by_zero = 1 / 0
 
 
 @app.route('/callback_strava', methods=['POST'])

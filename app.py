@@ -101,14 +101,13 @@ def update_task(task_id):
         task.name = new_name
     if new_every:
         task.every = new_every
+        notification.check_task_amount(task, user)
     if new_comment:
         task.comment = new_comment
     if remain:
         task.remain = remain
     session.add(task)
     session.commit()
-    if new_every:
-        notification.check_task_amount(task, user)
     return jsonify({'task': task.id})
 
 

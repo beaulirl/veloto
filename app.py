@@ -108,7 +108,7 @@ def update_task(task_id):
         task.remain = remain
     session.add(task)
     session.commit()
-    return jsonify({'task': task.id})
+    return jsonify(task.to_dict())
 
 
 @app.route('/api/v1/tasks/<int:task_id>', methods=['DELETE'])

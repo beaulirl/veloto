@@ -79,7 +79,7 @@ def create_task():
     task = Task(name=task_name, every=task_repeat, comment=task_comment, user_id=user_id)
     session.add(task)
     session.commit()
-    return jsonify({'task': task.id}), 201
+    return jsonify({'task': task.to_dict()}), 201
 
 
 @app.route('/api/v1/tasks/<int:task_id>', methods=['PUT'])

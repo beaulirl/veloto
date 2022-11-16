@@ -100,8 +100,8 @@ def update_task(task_id):
     if new_name:
         task.name = new_name
     if new_every:
-        task.every = new_every
-        notification.check_task_amount(task, user)
+        diff = task.every - new_every
+        task.remain += diff
     if new_comment:
         task.comment = new_comment
     if remain:

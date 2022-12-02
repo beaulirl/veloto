@@ -103,6 +103,7 @@ def update_task(task_id):
     if new_every:
         diff = task.every - new_every
         task.remain -= diff
+        task.every = new_every
     if new_comment:
         task.comment = new_comment
     if remain:

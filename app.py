@@ -77,9 +77,10 @@ def create_task():
     if not user:
         return 'User not found', 404
     task = Task(name=task_name, every=task_repeat, comment=task_comment, user_id=user_id)
+    task.remain = task_repeat
     session.add(task)
     session.commit()
-    return jsonify({'task': task.to_dict()}), 201
+    return jsonify(task.to_dict()), 201
 
 
 @app.route('/api/v1/tasks/<int:task_id>', methods=['PUT'])
@@ -100,7 +101,7 @@ def update_task(task_id):
     if new_name:
         task.name = new_name
     if new_every:
-        diff = task.every - new_every
+        diff = abs(task.every - new_every)
         task.remain += diff
     if new_comment:
         task.comment = new_comment
@@ -165,7 +166,7 @@ def patch_task_remain(task_id):
         return 'Task not found', 404
     if user.id != task.user_id:
         return 'Unauthorized', 403
-    task.remain = 0
+    task.remain = task.every
     session.commit()
     return jsonify({'result': f'Task {task_id} remain was set to 0'})
 

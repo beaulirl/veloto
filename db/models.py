@@ -70,7 +70,7 @@ class Task(Base, SerializerMixin):
     name = Column("name", String)
     every = Column("every", Integer)
     comment = Column("comment", String)
-    remain = Column("remain", Integer, default=0)
+    remain = Column("remain", Integer)
 
 
 class Notifications(Base):

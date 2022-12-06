@@ -104,7 +104,7 @@ def update_task(task_id):
         diff = task.every - new_every
         task.remain -= diff
         task.every = new_every
-    if new_comment:
+    if new_comment is not None:
         task.comment = new_comment
     if remain:
         task.remain = remain
@@ -138,7 +138,7 @@ def get_tasks():
 
 def add_defaults_tasks_for_user(user):
     for value in get_default_tasks_list():
-        session.add(Task(name=value[0], every=value[1], user_id=user.id, comment=value[2]))
+        session.add(Task(name=value[0], every=value[1], user_id=user.id, comment=value[2], remain=value[1]))
     session.commit()
 
 
